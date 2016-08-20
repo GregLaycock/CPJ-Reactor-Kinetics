@@ -1,6 +1,8 @@
 import Adjust_Kinetics
 from PB_isothermal import *
 
+
+
 def model_curves(Z):
     from numpy import linspace, array, append, squeeze, zeros
     from scipy.integrate import odeint
@@ -21,6 +23,10 @@ def model_curves(Z):
     Qo = Adjust_Kinetics.Specs['Qo']
     Po = Adjust_Kinetics.Specs['Po']
     Fto = Adjust_Kinetics.Specs['Fto']
+    M = Adjust_Kinetics.M
+    D = Adjust_Kinetics.Specs['D']
+    eps = Adjust_Kinetics.Specs['voidfrac']
+    dp = Adjust_Kinetics.Specs['cat_part_diam']
 
 # define ode function
     import numpy
@@ -35,15 +41,14 @@ def model_curves(Z):
 
 
     def odesys(var,Z):
-        Specs =  Adjust_Kinetics.Specs
+        Specs = Adjust_Kinetics.Specs
         Ft = 0
         F = {}
         for i,name in enumerate(names):
             F[name] = var[i]
         Nc = len(names)
         P = var[Nc]
-
-        del_P =
+        del_P = Pressure_drop(F,M,D,T,eps,dp,P)
 
         for i in range(Nc):
             Ft += var[i]
@@ -79,6 +84,8 @@ def model_curves(Z):
 
     plot_vals['Q'] = Qo*(Po/plot_vals['P'])*(FT_vals/Fto)
 
+    conversion = (Adjust_Kinetics.components[Adjust_Kinetics.converting] - F_vals[Adjust_Kinetics.converting])/Adjust_Kinetics.components[Adjust_Kinetics.converting]
+    plot_vals['conversion'] = conversion
     return plot_vals
 
 
@@ -91,4 +98,5 @@ def P_drop_curve(Z):
 def flow_curve(Z):
     curves = model_curves(Z)
     return curves['Q']
+
 
